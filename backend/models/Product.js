@@ -1,5 +1,3 @@
-// backend/models/Product.js
-
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
@@ -14,24 +12,16 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
 
-    description: {
-      type: String,
-    },
+    description: String,
 
-    category: {
-      type: String,
-    },
+    category: String,
 
     stock: {
       type: Number,
       default: 0,
     },
 
-    images: [
-      {
-        type: String,
-      },
-    ],
+    images: [String],
 
     rating: {
       type: Number,
