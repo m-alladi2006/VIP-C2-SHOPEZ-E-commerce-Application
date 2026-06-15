@@ -7,8 +7,13 @@ const {
   getAllOrders,
 } = require("../controllers/orderController");
 
-router.post("/create", createOrder);
-router.get("/user", getUserOrders);
-router.get("/all", getAllOrders);
+const { protect, adminOnly } = require("../middleware/authMiddleware");
+
+// USER
+router.post("/create", protect, createOrder);
+router.get("/user", protect, getUserOrders);
+
+// ADMIN
+router.get("/all", protect, adminOnly, getAllOrders);
 
 module.exports = router;

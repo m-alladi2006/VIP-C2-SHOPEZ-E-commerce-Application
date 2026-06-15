@@ -1,6 +1,8 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const generateToken = require("../utils/generateToken");
+
 
 // REGISTER
 const registerUser = async (req, res) => {
@@ -24,23 +26,31 @@ const registerUser = async (req, res) => {
   });
 };
 
-// LOGIN
+// LOGIN (UPDATED)
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
-  if (!user) return res.status(400).json({ message: "User not found" });
+
+  if (!user) {
+    return res.status(400).json({ message: "User not found" });
+  }
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-  const token = jwt.sign(
-    { id: user._id, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
-  );
+  if (!isMatch) {
+    return res.status(400).json({ message: "Invalid credentials" });
+  }
 
-  res.json({ token });
+  const token = generateToken(user);
+
+  res.json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    token,
+  });
 };
 
 // PROFILE (simple version)
