@@ -31,12 +31,17 @@ const registerUser = async (req, res) => {
     password: hashedPassword,
   });
 
-  res.status(201).json({
+  const token = generateToken(user);
+
+res.status(201).json({
+  token,
+  user: {
     _id: user._id,
     name: user.name,
     email: user.email,
-  });
-};
+    role: user.role,
+  },
+});
 
 // LOGIN (UPDATED)
 const loginUser = async (req, res) => {
@@ -45,29 +50,53 @@ const loginUser = async (req, res) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    return res.status(400).json({ message: "User not found" });
+    return res.status(400).json({
+      message: "User not found",
+    });
   }
 
-  const isMatch = await bcrypt.compare(password, user.password);
+  const isMatch = await bcrypt.compare(
+    password,
+    user.password
+  );
 
   if (!isMatch) {
-    return res.status(400).json({ message: "Invalid credentials" });
+    return res.status(400).json({
+      message: "Invalid credentials",
+    });
   }
 
   const token = generateToken(user);
 
   res.json({
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
     token,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
   });
 };
 
 // PROFILE (simple version)
 const getUserProfile = async (req, res) => {
-  res.json({ message: "Profile route working (add auth middleware next)" });
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.json(user);
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 };
 
 module.exports = {

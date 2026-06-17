@@ -2,11 +2,14 @@ const User = require("../models/User");
 
 // ADD TO CART
 const addToCart = async (req, res) => {
-  const { userId, productId, quantity } = req.body;
+  const { productId, quantity } = req.body;
 
-  const user = await User.findById(userId);
+  const user = await User.findById(req.user.id);
 
-  user.cart.push({ productId, quantity });
+  user.cart.push({
+    productId,
+    quantity,
+  });
 
   await user.save();
 
@@ -15,18 +18,17 @@ const addToCart = async (req, res) => {
 
 // GET CART
 const getCart = async (req, res) => {
-  const { userId } = req.body;
-
-  const user = await User.findById(userId).populate("cart.productId");
+  const user = await User.findById(req.user.id)
+    .populate("cart.productId");
 
   res.json(user.cart);
 };
 
 // REMOVE FROM CART
 const removeFromCart = async (req, res) => {
-  const { userId, productId } = req.body;
+  const { productId } = req.body;
 
-  const user = await User.findById(userId);
+  const user = await User.findById(req.user.id);
 
   user.cart = user.cart.filter(
     (item) => item.productId.toString() !== productId

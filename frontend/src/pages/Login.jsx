@@ -1,48 +1,130 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import API from "../services/api";
 
 function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
 
-  const loginHandler = async (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    setError("");
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    const res = await API.post("/auth/login", {
-      email,
-      password,
-    });
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields");
+      return;
+    }
 
-    localStorage.setItem(
-      "token",
-      res.data.token
-    );
+    try {
+      setIsLoading(true);
+      const response = await API.post("/auth/login", formData);
 
-    alert("Login Success");
+      const { token, user } = response.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      alert("Login successful!");
+
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || "Login failed";
+      setError(message);
+      console.error("Login error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={loginHandler}>
-      <input
-        type="email"
-        placeholder="Email"
-        onChange={(e) =>
-          setEmail(e.target.value)
-        }
-      />
+    <div className="auth-page">
+      <Navbar />
+      <div className="container">
+        <div className="auth-container">
+          <div className="auth-card">
+            <h1>Welcome Back!</h1>
+            <p>Login to your ShopEZ account</p>
 
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={(e) =>
-          setPassword(e.target.value)
-        }
-      />
+            {error && <div className="error-message">{error}</div>}
 
-      <button type="submit">
-        Login
-      </button>
-    </form>
+            <form onSubmit={handleSubmit} className="auth-form">
+              <div className="form-group">
+                <label htmlFor="email">Email Address</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  className="form-input"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  className="form-input"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="btn btn-primary btn-large"
+                disabled={isLoading}
+              >
+                {isLoading ? "Logging in..." : "Login"}
+              </button>
+            </form>
+
+            <div className="auth-footer">
+              <p>
+                Don't have an account?{" "}
+                <Link to="/register" className="auth-link">
+                  Register here
+                </Link>
+              </p>
+            </div>
+
+            <div className="demo-info">
+              <p>
+                <strong>Demo Account:</strong>
+              </p>
+              <p>Email: user@example.com</p>
+              <p>Password: password123</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </div>
   );
 }
 
