@@ -8,6 +8,18 @@ const generateToken = require("../utils/generateToken");
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
+  if (!email.includes("@")) {
+  return res.status(400).json({
+    message: "Invalid email format",
+  });
+}
+
+  if (password.length < 6) {
+  return res.status(400).json({
+    message: "Password must be at least 6 characters",
+  });
+}
+
   const userExists = await User.findOne({ email });
   if (userExists) return res.status(400).json({ message: "User already exists" });
 
