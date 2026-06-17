@@ -9,16 +9,16 @@ const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!email.includes("@")) {
-  return res.status(400).json({
-    message: "Invalid email format",
-  });
-}
+    return res.status(400).json({
+      message: "Invalid email format",
+    });
+  }
 
   if (password.length < 6) {
-  return res.status(400).json({
-    message: "Password must be at least 6 characters",
-  });
-}
+    return res.status(400).json({
+      message: "Password must be at least 6 characters",
+    });
+  }
 
   const userExists = await User.findOne({ email });
   if (userExists) return res.status(400).json({ message: "User already exists" });
@@ -33,15 +33,16 @@ const registerUser = async (req, res) => {
 
   const token = generateToken(user);
 
-res.status(201).json({
-  token,
-  user: {
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-  },
-});
+  res.status(201).json({
+    token,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+  });
+}; 
 
 // LOGIN (UPDATED)
 const loginUser = async (req, res) => {

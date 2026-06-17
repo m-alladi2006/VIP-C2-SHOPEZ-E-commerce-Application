@@ -1,0 +1,6 @@
+{
+  "name": "ShopEZ",
+  "description": "An effortless online e-commerce shopping platform featuring advanced catalog filtering, shopping cart persistence, secure mock checkout, order tracking, and an analytical admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
